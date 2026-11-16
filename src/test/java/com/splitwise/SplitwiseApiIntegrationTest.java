@@ -41,6 +41,25 @@ class SplitwiseApiIntegrationTest {
     }
 
     @Test
+    void openApiDeclaresBearerJwtSchemeForProtectedEndpointsOnly() throws Exception {
+        String response = mvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        JsonNode docs = json.readTree(response);
+
+        JsonNode scheme = docs.at("/components/securitySchemes/bearerAuth");
+        assertThat(scheme.get("type").asText()).isEqualTo("http");
+        assertThat(scheme.get("scheme").asText()).isEqualTo("bearer");
+        assertThat(scheme.get("bearerFormat").asText()).isEqualTo("JWT");
+
+        // applied globally...
+        assertThat(docs.at("/security/0").has("bearerAuth")).isTrue();
+        // ...but signup/login override it with an empty requirement
+        assertThat(docs.at("/paths/~1api~1auth~1login/post/security")).isEmpty();
+        assertThat(docs.at("/paths/~1api~1auth~1signup/post/security")).isEmpty();
+    }
+
+    @Test
     void signupValidatesInput() throws Exception {
         mvc.perform(post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"\",\"email\":\"nope\",\"password\":\"short\"}"))
