@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: splitwise
+      POSTGRES_USER: splitwise
+      POSTGRES_PASSWORD: splitwise
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U splitwise"]
+      interval: 5s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/splitwise
+      SPRING_DATASOURCE_USERNAME: splitwise
+      SPRING_DATASOURCE_PASSWORD: splitwise
+      JWT_SECRET: ${JWT_SECRET:-ZG9ja2VyLWNvbXBvc2UtZGV2LXNlY3JldC1jaGFuZ2UtbWUtMTIzNDU2Nzg5MA==}
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata:
