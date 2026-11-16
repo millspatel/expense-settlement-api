@@ -1,18 +1,19 @@
 services:
   db:
-    image: postgres:16-alpine
+    image: mysql:8.4
     environment:
-      POSTGRES_DB: splitwise
-      POSTGRES_USER: splitwise
-      POSTGRES_PASSWORD: splitwise
+      MYSQL_DATABASE: splitwise
+      MYSQL_USER: splitwise
+      MYSQL_PASSWORD: splitwise
+      MYSQL_ROOT_PASSWORD: root
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - mysqldata:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U splitwise"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-usplitwise", "-psplitwise"]
       interval: 5s
-      retries: 10
+      retries: 20
 
   app:
     build: .
@@ -20,7 +21,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/splitwise
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/splitwise?serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: splitwise
       SPRING_DATASOURCE_PASSWORD: splitwise
       JWT_SECRET: ${JWT_SECRET:-ZG9ja2VyLWNvbXBvc2UtZGV2LXNlY3JldC1jaGFuZ2UtbWUtMTIzNDU2Nzg5MA==}
@@ -28,4 +29,4 @@ services:
       - "8080:8080"
 
 volumes:
-  pgdata:
+  mysqldata:

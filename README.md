@@ -7,7 +7,7 @@ algorithm reduces a tangle of IOUs to the fewest practical payments.
 ![CI](../../actions/workflows/ci.yml/badge.svg)
 
 **Stack:** Java 21 · Spring Boot 3.5 · Spring Security + JWT · Spring Data JPA (Hibernate) ·
-PostgreSQL (H2 for local/tests) · JUnit 5 + MockMvc · Docker · GitHub Actions · OpenAPI/Swagger UI
+MySQL 8 (H2 for local/tests) · JUnit 5 + MockMvc · Docker · GitHub Actions · OpenAPI/Swagger UI
 
 ---
 
@@ -101,7 +101,7 @@ curl -s localhost:8080/api/groups/1/balances -H "Authorization: Bearer $TOKEN"
 mvn spring-boot:run
 ```
 
-**With PostgreSQL via Docker:**
+**With MySQL via Docker:**
 
 ```bash
 docker compose up --build
@@ -117,7 +117,7 @@ mvn test
 
 | Variable | Purpose | Default |
 |---|---|---|
-| `SPRING_DATASOURCE_URL` | JDBC URL, e.g. `jdbc:postgresql://host:5432/db` | in-memory H2 |
+| `SPRING_DATASOURCE_URL` | JDBC URL, e.g. `jdbc:mysql://host:3306/db` | in-memory H2 |
 | `SPRING_DATASOURCE_USERNAME` / `SPRING_DATASOURCE_PASSWORD` | DB credentials | `sa` / empty |
 | `JWT_SECRET` | Base64-encoded HMAC key, ≥ 32 bytes. **Set this in production.** | dev-only key |
 | `JWT_EXPIRATION_MINUTES` | Token lifetime | `1440` |
@@ -125,15 +125,14 @@ mvn test
 
 Generate a secret with `openssl rand -base64 48`.
 
-### Deploying to Render
+### Deploying
 
-1. Create a **PostgreSQL** instance on Render and note its host, database, user and password.
-2. Create a **Web Service** from this repo, runtime **Docker**.
-3. Set environment variables: `SPRING_DATASOURCE_URL=jdbc:postgresql://<host>:5432/<db>`,
+1. Create a **MySQL 8** database (e.g. a MySQL service on Railway, or Aiven / any managed MySQL)
+   and note its host, port, database, user and password.
+2. Deploy this repo as a **Docker** web service (Railway, Render, etc.).
+3. Set environment variables: `SPRING_DATASOURCE_URL=jdbc:mysql://<host>:<port>/<db>`,
    `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`, and `JWT_SECRET`.
 4. Health check path: `/actuator/health`.
-
-(Railway works the same way: add a Postgres plugin, deploy from the Dockerfile, set the same variables.)
 
 ---
 
