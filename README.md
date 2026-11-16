@@ -1,4 +1,4 @@
-# Splitwise-style Expense Splitter API
+# Group Expense Settlement API
 
 A Spring Boot REST API for sharing expenses within groups — sign up, create groups, add expenses split
 **equally, by percentage or by exact amounts**, and see who owes whom. A **debt simplification**
